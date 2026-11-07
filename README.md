@@ -35,30 +35,6 @@ image-resizer/
 └── README.md
 ```
 
-## 本機執行
-
-直接用瀏覽器開啟 `index.html` 即可；或啟動本機伺服器：
-
-```bash
-python -m http.server 8000
-# 開啟 http://localhost:8000
-```
-
-## 部署到 GitHub Pages
-
-```bash
-cd image-resizer
-git init
-git add .
-git commit -m "Initial commit: image resizer"
-git branch -M main
-git remote add origin https://github.com/dvl-studio/image-resizer.git
-git push -u origin main
-```
-
-接著到 GitHub repo → **Settings → Pages** → Source 選 **Deploy from a branch**，Branch 選 `main`、資料夾 `/ (root)`，儲存後約 1 分鐘即可在
-`https://dvl-studio.github.io/image-resizer/` 使用。
-
 ## 輸出檔名規則
 
 `原檔名_寬x高.副檔名`，例如 `photo_400x500.jpg`。ZIP 內若有重複檔名會自動加上 `(1)`、`(2)`。
