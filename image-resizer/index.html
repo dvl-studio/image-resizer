@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Resizer｜自訂像素尺寸圖片調整工具</title>
+  <meta name="description" content="純前端圖片尺寸調整工具：自訂寬高（例如 400×500）、裁切填滿 / 等比留白 / 拉伸、批次處理、ZIP 下載。圖片不會上傳到伺服器。" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📐</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <h1>📐 Image Resizer</h1>
+    <p>自訂像素尺寸、批次處理，所有運算都在瀏覽器本機完成，圖片不會上傳。</p>
+  </header>
+
+  <main class="container">
+    <!-- 上傳區 -->
+    <section id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="選擇或拖曳圖片">
+      <input type="file" id="fileInput" accept="image/*" multiple hidden />
+      <div class="drop-icon">🖼️</div>
+      <p><strong>點擊選擇</strong>、拖曳圖片到這裡，或直接 <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>V</kbd> 貼上</p>
+      <p class="hint">支援 JPG、PNG、WebP、GIF（第一格）、BMP，可一次多張</p>
+    </section>
+
+    <!-- 設定區 -->
+    <section class="panel">
+      <h2>輸出設定</h2>
+
+      <div class="field">
+        <label>常用尺寸</label>
+        <div class="presets" id="presets">
+          <button type="button" data-w="400" data-h="500">400×500</button>
+          <button type="button" data-w="413" data-h="531">2 吋證件照 413×531</button>
+          <button type="button" data-w="295" data-h="413">1 吋證件照 295×413</button>
+          <button type="button" data-w="1080" data-h="1080">IG 方形 1080×1080</button>
+          <button type="button" data-w="1080" data-h="1350">IG 直式 1080×1350</button>
+          <button type="button" data-w="1080" data-h="1920">限動 1080×1920</button>
+          <button type="button" data-w="1920" data-h="1080">FHD 1920×1080</button>
+          <button type="button" data-w="1200" data-h="630">OG 分享圖 1200×630</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="width">寬度 (px)</label>
+          <input type="number" id="width" min="1" max="10000" value="400" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label for="height">高度 (px)</label>
+          <input type="number" id="height" min="1" max="10000" value="500" inputmode="numeric" />
+        </div>
+        <div class="field field-inline">
+          <button type="button" id="swapBtn" class="btn-ghost" title="寬高互換">⇄ 互換</button>
+          <label class="check"><input type="checkbox" id="lockRatio" /> 鎖定第一張圖片比例</label>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="mode">縮放模式</label>
+          <select id="mode">
+            <option value="cover" selected>裁切填滿（不變形，超出部分裁掉）</option>
+            <option value="contain">等比縮放＋留白（不裁切）</option>
+            <option value="stretch">強制拉伸（可能變形）</option>
+          </select>
+        </div>
+        <div class="field" id="anchorField">
+          <label for="anchor">裁切位置</label>
+          <select id="anchor">
+            <option value="center" selected>置中</option>
+            <option value="top">靠上（人像建議）</option>
+            <option value="bottom">靠下</option>
+            <option value="left">靠左</option>
+            <option value="right">靠右</option>
+          </select>
+        </div>
+        <div class="field" id="bgField">
+          <label for="bgColor">留白 / 透明底色</label>
+          <div class="color-row">
+            <input type="color" id="bgColor" value="#ffffff" />
+            <label class="check"><input type="checkbox" id="transparentBg" /> 透明（PNG / WebP）</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="format">輸出格式</label>
+          <select id="format">
+            <option value="original">與原檔相同</option>
+            <option value="image/jpeg" selected>JPG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp">WebP</option>
+          </select>
+        </div>
+        <div class="field" id="qualityField">
+          <label for="quality">品質：<span id="qualityValue">90</span>%</label>
+          <input type="range" id="quality" min="10" max="100" value="90" />
+        </div>
+        <div class="field">
+          <label class="check"><input type="checkbox" id="noUpscale" /> 不放大小圖（原圖較小時保持原尺寸）</label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="processBtn" class="btn-primary" disabled>開始調整</button>
+        <button type="button" id="zipBtn" class="btn-secondary" disabled>全部下載（ZIP）</button>
+        <button type="button" id="clearBtn" class="btn-ghost" disabled>清除全部</button>
+      </div>
+      <p id="status" class="status" aria-live="polite"></p>
+    </section>
+
+    <!-- 結果區 -->
+    <section id="list" class="list" aria-live="polite"></section>
+  </main>
+
+  <footer class="footer">
+    <p>Made with ❤️ · 純前端處理，不收集任何資料 · <a href="https://github.com/dvl-studio/image-resizer" target="_blank" rel="noopener">GitHub</a></p>
+  </footer>
+
+  <script src="zip.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+# 📐 Image Resizer
+
+純前端的圖片尺寸調整工具，可自訂輸出像素（例如 **400×500**），支援批次處理與 ZIP 一次下載。
+所有運算都在瀏覽器本機完成，**圖片不會上傳到任何伺服器**。
+
+🔗 線上版：https://dvl-studio.github.io/image-resizer/
+
+## 功能
+
+- 自訂寬高（1～10000 px），內建常用尺寸：400×500、證件照、IG、限動、FHD、OG 分享圖
+- 三種縮放模式
+  - **裁切填滿**：不變形，填滿指定尺寸，超出部分裁掉（可選裁切位置：置中／靠上／靠下／靠左／靠右）
+  - **等比縮放＋留白**：不裁切，空白處補底色或透明
+  - **強制拉伸**：直接拉成指定尺寸（可能變形）
+- 鎖定第一張圖片比例、寬高一鍵互換
+- 輸出 JPG／PNG／WebP 或與原檔相同，可調整品質
+- 「不放大小圖」選項，避免小圖被放大變糊
+- 自動套用手機照片的 EXIF 方向
+- 高品質縮小（逐步減半縮放，減少鋸齒）
+- 多張批次處理、單張下載或全部打包成 ZIP（支援中文檔名）
+- 點擊、拖曳、Ctrl/⌘ + V 貼上三種加入方式
+- 支援深色模式、手機版面
+- 零相依套件、不需 build
+
+## 檔案結構
+
+```
+image-resizer/
+├── index.html   # 頁面
+├── style.css    # 樣式
+├── app.js       # 主要邏輯（讀圖、縮放、輸出）
+├── zip.js       # 內建 ZIP 打包器（無外部相依）
+├── .nojekyll    # 讓 GitHub Pages 直接提供靜態檔
+├── LICENSE
+└── README.md
+```
+
+## 本機執行
+
+直接用瀏覽器開啟 `index.html` 即可；或啟動本機伺服器：
+
+```bash
+python -m http.server 8000
+# 開啟 http://localhost:8000
+```
+
+## 部署到 GitHub Pages
+
+```bash
+cd image-resizer
+git init
+git add .
+git commit -m "Initial commit: image resizer"
+git branch -M main
+git remote add origin https://github.com/dvl-studio/image-resizer.git
+git push -u origin main
+```
+
+接著到 GitHub repo → **Settings → Pages** → Source 選 **Deploy from a branch**，Branch 選 `main`、資料夾 `/ (root)`，儲存後約 1 分鐘即可在
+`https://dvl-studio.github.io/image-resizer/` 使用。
+
+## 輸出檔名規則
+
+`原檔名_寬x高.副檔名`，例如 `photo_400x500.jpg`。ZIP 內若有重複檔名會自動加上 `(1)`、`(2)`。
+
+## 注意事項
+
+- JPG 不支援透明，透明區域會填入所選底色。
+- 「不放大小圖」：裁切填滿／拉伸模式下，原圖較小時輸出尺寸會縮小為原圖可提供的範圍；等比留白模式則維持指定畫布尺寸，圖片置中不放大。
+- 少數舊版 Safari 不支援 WebP 輸出，會自動改存 PNG 並提示。
+- GIF 動圖只會輸出第一格。
+
+## License
+
+MIT
